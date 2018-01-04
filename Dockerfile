@@ -46,8 +46,10 @@ ADD nmbd-run.sh         /etc/services.d/nmbd/run
 ADD smbd-run.sh         /etc/services.d/smbd/run
 
 # s6 fix-attrs script
-ADD 01-timemachine-data-dir /etc/fix-attrs.d/01-timemachine-data-dir
+#ADD 01-timemachine-data-dir /etc/fix-attrs.d/01-timemachine-data-dir
+
+ADD docker-entrypoint.sh     /
 
 EXPOSE 137/udp 138/udp 139 445
 
-CMD ["/init"]
+CMD ["/docker-entrypoint.sh"]
