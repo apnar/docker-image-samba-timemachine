@@ -11,8 +11,6 @@ RUN apt-get -q update \
       libpopt-dev libreadline-dev perl perl-modules pkg-config \
       python-all-dev python-dev python-dnspython python-crypto \
       xsltproc zlib1g-dev git \
-      avahi-daemon \
-      avahi-utils \
     && apt-get -y autoremove \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -20,7 +18,7 @@ RUN apt-get -q update \
 
 # clone and build samba. Based on this patch: https://github.com/samba-team/samba/pull/64
 RUN cd /tmp \
-    && git clone https://github.com/samba-team/samba.git \
+    && git clone -b bz12380-full_fsync https://github.com/kevinanderson1/samba.git \
     && cd samba \
     && ./configure && make -j$(nproc) && make -j$(nproc) install \
     && cd /tmp \
@@ -41,13 +39,11 @@ ADD ./samba-dfree.sh /bin/samba-dfree.sh
 RUN (echo backup; echo backup) | /usr/local/samba/bin/smbpasswd -s -a backup
 
 # install avahi (bonjour) announcer
-ADD avahi-daemon.conf /etc/avahi/avahi-daemon.conf
 ADD smb.service       /etc/avahi/services/smb.service
 
 # s6 service scripts
 ADD nmbd-run.sh         /etc/services.d/nmbd/run
 ADD smbd-run.sh         /etc/services.d/smbd/run
-ADD avahi-daemon-run.sh /etc/services.d/avahi-daemon/run
 
 
 # s6 fix-attrs script
