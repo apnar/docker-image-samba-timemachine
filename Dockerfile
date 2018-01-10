@@ -11,6 +11,8 @@ RUN apt-get -q update \
       libpopt-dev libreadline-dev perl perl-modules pkg-config \
       python-all-dev python-dev python-dnspython python-crypto \
       xsltproc zlib1g-dev git \
+      avahi-daemon \
+      avahi-utils \
     && apt-get -y autoremove \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -39,18 +41,18 @@ ADD ./samba-dfree.sh /bin/samba-dfree.sh
 RUN (echo backup; echo backup) | /usr/local/samba/bin/smbpasswd -s -a backup
 
 # install avahi (bonjour) announcer
+ADD avahi-daemon.conf /etc/avahi/avahi-daemon.conf
 ADD smb.service       /etc/avahi/services/smb.service
 
 # s6 service scripts
 ADD nmbd-run.sh         /etc/services.d/nmbd/run
 ADD smbd-run.sh         /etc/services.d/smbd/run
-
+ADD avahi-daemon-run.sh /etc/services.d/avahi-daemon/run
+ADD docker-entrypoint.sh     /
 
 # s6 fix-attrs script
-#ADD 01-timemachine-data-dir /etc/fix-attrs.d/01-timemachine-data-dir
-
-ADD docker-entrypoint.sh     /
+ADD 01-timemachine-data-dir /etc/fix-attrs.d/01-timemachine-data-dir
 
 EXPOSE 137/udp 138/udp 139 445
 
-CMD ["/docker-entrypoint.sh"]
+CMD ["/init"]
